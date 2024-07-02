@@ -1,8 +1,7 @@
-use std::{fs, path::PathBuf};
-
 use clap::Parser;
 use directories::ProjectDirs;
 use owo_colors::OwoColorize;
+use std::{fs, path::PathBuf};
 use tasks_rs::{AddArgs, EditArgs, GetArgs, RemoveArgs, Task, TaskManager, TaskStatus};
 
 #[derive(Parser)]
