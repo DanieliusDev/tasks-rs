@@ -1,0 +1,47 @@
+name: Bug Report
+description: Report a bug about the project.
+title: "[Bug]: "
+assignees: [gamertike]
+labels: [bug]
+
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: A detailed description of the bug.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Version
+      description: |
+        The exact version of the project.
+        Run `tasks-rs -V` to get the current version.
+      placeholder: x.y.z
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: The steps to reproduce the bug.
+      value: |
+        1.
+        2.
+        3.
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: The expected behavior of the bug.
+      value: |
+        1.
+        2.
+        3.
+        ...
+    validations:
+      required: true

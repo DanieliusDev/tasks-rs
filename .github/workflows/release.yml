@@ -1,0 +1,79 @@
+name: Release
+on:
+  release:
+    types: published
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: tasks-rs.exe
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            bin: tasks-rs
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            bin: tasks-rs
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            bin: tasks-rs
+
+    env:
+      ARCHIVE: tasks-rs-${{ github.ref_name }}-${{ matrix.target }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Add target
+        shell: bash
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build
+        shell: bash
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Create directory
+        shell: bash
+        run: |
+          mkdir ${{ env.ARCHIVE }}
+          cp target/${{ matrix.target }}/release/${{ matrix.bin }} ${{ env.ARCHIVE }}
+          cp README.md ${{ env.ARCHIVE }}
+
+      - name: Compress archive (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          7z a ${{ env.ARCHIVE }}.zip ${{ env.ARCHIVE }}
+          echo "ASSET=${{ env.ARCHIVE }}.zip" >> $GITHUB_ENV
+
+      - name: Compress archive (Unix)
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          tar czf ${{ env.ARCHIVE }}.tar.gz ${{ env.ARCHIVE }}
+          echo "ASSET=${{ env.ARCHIVE }}.tar.gz" >> $GITHUB_ENV
+
+      - name: Upload Asset
+        shell: bash
+        run: gh release upload ${{ github.ref_name }} $ASSET
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  publish-crate:
+    name: Publish to Crates.io
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Publish to Crates.io
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
